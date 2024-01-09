@@ -1,36 +1,54 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Controller, useForm } from 'react-hook-form';
-import { ArrowCircleDown, ArrowCircleUp, X } from "phosphor-react";
-import { CloseButton, Content, Overlay, TransactionType, TransactionTypeButton } from './styles';
+import * as Dialog from '@radix-ui/react-dialog'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Controller, useForm } from 'react-hook-form'
+import { useContext } from 'react'
+import { TransactionsContext } from '../../contexts/TransactionsContext'
+import { ArrowCircleDown, ArrowCircleUp, X } from 'phosphor-react'
+import {
+  CloseButton,
+  Content,
+  Overlay,
+  TransactionType,
+  TransactionTypeButton,
+} from './styles'
 
 const newTransactionFormSchema = z.object({
   description: z.string(),
   price: z.number(),
   category: z.string(),
   type: z.enum(['income', 'outcome']),
-});
+})
 
-type NewTransactionFormInputs = z.infer<typeof newTransactionFormSchema>;
+type NewTransactionFormInputs = z.infer<typeof newTransactionFormSchema>
 
 export function NewTransactionModal() {
+  const { createTransaction } = useContext(TransactionsContext)
+
   const {
     control,
     register,
     handleSubmit,
-    formState: { isSubmitting }
+    formState: { isSubmitting },
+    reset,
   } = useForm<NewTransactionFormInputs>({
     resolver: zodResolver(newTransactionFormSchema),
     defaultValues: {
-      type: 'income'
-    }
+      type: 'income',
+    },
   })
 
   async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const { description, price, category, type } = data
 
-    console.log(data);
+    await createTransaction({
+      description,
+      price,
+      category,
+      type,
+    })
+
+    reset()
   }
   return (
     <Dialog.Portal>
@@ -91,5 +109,5 @@ export function NewTransactionModal() {
         </form>
       </Content>
     </Dialog.Portal>
-  );
+  )
 }
